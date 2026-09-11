@@ -2,8 +2,6 @@
 
 Projet réalisé dans le cadre du programme **AnalystLab Africa — Experience Lab**.
 
-**Stagiaire :** Fortuné Assouan — Piste Data Analytics
-
 ---
 
 ## Fichiers de la semaine
@@ -43,14 +41,10 @@ Découverte complémentaire : l'antécédent de no-show a un effet **gradient** 
 
 ## Intégration cross-track
 
-Stage mené en autonomie (pas de coéquipier réel sur la piste Data Science) : l'intégration a été documentée en produisant un livrable réellement exploitable — le fichier dérivé et ses variables de risque — plutôt qu'un échange simulé. Détails complets dans le rapport, section 4.
+Travail mené en autonomie (pas de coéquipier réel sur la piste Data Science) : l'intégration a été documentée en produisant un livrable réellement exploitable — le fichier dérivé et ses variables de risque — plutôt qu'un échange simulé. Détails complets dans le rapport, section 4.
 
 ## Limites
 
 - Score à 4 facteurs cumulés basé sur un échantillon restreint (n=22), à interpréter avec prudence.
 - Associations statistiques, non des relations de cause à effet.
 - Jeu de données fictif et anonymisé.
-
-## Suite prévue (Semaine 7)
-
-Tester le `risk_score` comme variable dans un modèle de classification simple, vérifier la stabilité du score sur un sous-échantillon de validation.
