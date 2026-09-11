@@ -40,6 +40,4 @@ Préparer le jeu de données et produire une première analyse exploratoire du n
 
 ~2 % de valeurs manquantes sur `distance_to_clinic_km` et `waiting_time_minutes` ; imputation par la médiane recommandée mais application dans le modèle final non confirmée à ce stade.
 
-## Suite prévue (Semaine 6)
 
-Approfondir les facteurs de risque combinés, valider les KPI, intégrer avec la piste Data Science.
