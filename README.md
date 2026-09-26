@@ -1,197 +1,133 @@
-# HealthConnect — Dashboard Power BI des rendez-vous et des absences
+#  HealthConnect Clinic — Analyse des rendez-vous et prédiction du No-Show
 
-## À propos
+Analyse de données pour réduire les rendez-vous manqués (*no-show*) et améliorer l'expérience des patients d'une clinique fictive, **HealthConnect Clinic**.
 
-**HealthConnect Clinic** est une clinique fictive confrontée à un taux élevé d'absences aux rendez-vous (*no-shows*).
-
-Après l'analyse exploratoire et l'identification des principaux enjeux business réalisées lors du **Week 4**, ce projet poursuit l'analyse à travers la conception d'un **tableau de bord interactif avec Power BI**.
-
-L'objectif est de transformer les données de rendez-vous en indicateurs et visualisations permettant aux responsables de la clinique de mieux comprendre les facteurs associés aux absences et de faciliter la prise de décision.
-
-**Question centrale :** comment utiliser la Business Intelligence pour mieux comprendre les rendez-vous manqués et identifier les facteurs associés au No-Show ?
+[![Power BI](https://img.shields.io/badge/Power%20BI-Dashboard-F2C811?logo=powerbi&logoColor=black)](#-dashboard-power-bi)
+[![Python](https://img.shields.io/badge/Python-scikit--learn%20%7C%20Pandas-3776AB?logo=python&logoColor=white)](#-stack-technique)
+[![DAX](https://img.shields.io/badge/DAX-KPI%20%26%20mesures-yellow)](#-kpi-finaux)
 
 ---
 
-##  Continuité avec le Week 4
 
-Ce dashboard constitue la suite directe du projet réalisé lors du **Week 4 — Analyse des rendez-vous et prédiction des absences**.
 
-Lors du Week 4, le travail portait principalement sur :
+##  Problématique
 
-* la compréhension du problème business ;
-* l'exploration du dataset ;
-* le contrôle de la qualité des données ;
-* l'identification des variables importantes ;
-* la formulation des questions business ;
-* la définition des KPI à suivre.
+> Comment HealthConnect Clinic peut-elle utiliser la donnée et l'IA pour réduire les rendez-vous manqués (no-show) et améliorer l'accompagnement des patients ?
 
-Le **Week 5** consiste à transformer ces analyses en un outil de **Business Intelligence interactif** permettant d'explorer les résultats plus facilement.
+##  Structure du repo
 
----
+```
+HealthConnect-Healthcare-Appointment-Analytics/
+├── Week 4 HealthConnect/       # Prise en main du dataset, qualité des données, questions business, KPI proposés
+│   ├── analyse/                # Notebook d'exploration
+│   ├── data/                   # Dataset source
+│   └── report/                 # Rapport Semaine 4
+│
+├── week 5 Health Connect/      # EDA, 5 KPI (DAX), premier dashboard Power BI
+│   ├── dashboard/               # .pbix + capture d'écran
+│   ├── data/ · images/ · report/
+│
+├── week 6 Health Connect/      # Score de risque combiné, correction dashboard, intégration cross-track
+│   ├── dashboard/ · data/ · images/ · report/
+│
+├── week 7 Health Connect/      # Test, validation et affinement du score de risque (S6)
+│   ├── analyse/                 # Scripts Python : reconstruction du score, test de modèles de classification
+│   ├── data/ · image/ · report/
+│
+├── week 8 Health Connect/      # Intégration finale, package de décision complet
+│   ├── dashboard/ · data/ · notebook/ · report/
+│
+└── README.md
+```
+
+Chaque dossier de semaine contient son propre `README.md` détaillé.
 
 ##  Jeu de données
 
-Le projet utilise le dataset :
+`HealthConnect_Appointment_Data.csv` — **5 000 rendez-vous**, **18 colonnes**, **1 696 patients uniques**, du 1er janvier 2025 au 30 juin 2026 (réservations remontant jusqu'à novembre 2024).
 
-`HealthConnect_Appointment_Data.csv`
+Répartition de la variable cible `appointment_outcome` :
 
-Le jeu de données contient **5 000 rendez-vous** et **18 variables** couvrant notamment :
+| Issue | Part |
+|---|---|
+| No-Show | 48,5 % |
+| Attended | 46,3 % |
+| Cancelled | 5,3 % |
 
-* les caractéristiques démographiques des patients ;
-* les détails de réservation ;
-* l'historique des absences ;
-* l'envoi de rappels ;
-* la distance entre le patient et la clinique ;
-* le temps d'attente ;
-* le type de rendez-vous ;
-* l'issue du rendez-vous.
+Contrôle qualité (S4) : aucun doublon, dates cohérentes, pas de valeurs aberrantes. Seuls points à traiter : `reminder_channel` vide quand aucun rappel n'est envoyé (à recoder en catégorie « Aucun », pas un vrai NaN), et ~2 % de valeurs manquantes sur `distance_to_clinic_km` et `waiting_time_minutes` (imputation médiane, appliquée en S6 dans `HealthConnect_Appointment_Data_cleaned_S6.csv`).
 
-La variable cible principale est l'issue du rendez-vous :
+##  Démarche semaine par semaine
 
-`Attended` / `No-Show` / `Cancelled`
+| Semaine | Étape |
+|---|---|
+| **S4** | Prise en main du dataset, contrôle qualité, questions business, proposition de KPI |
+| **S5** | Nettoyage, EDA, 5 KPI calculés en DAX, dashboard Power BI (1 page), 5 premiers insights business |
+| **S6** | Construction d'un **score de risque combiné**, imputation médiane, correction d'une visualisation trompeuse, intégration cross-track |
+| **S7** | Test du score dans un modèle de classification, comparaison avec les 4 facteurs séparés, extension (arbre de décision, random forest) |
+| **S8** | Intégration finale, collaboration cross-track documentée, package de décision complet |
+
+
+##  KPI finaux
+
+| Indicateur | Valeur |
+|---|---|
+| Taux de No-Show global | **48,5 %** |
+| Taux de rappel envoyé | **72,7 %** |
+| No-show avec antécédent / sans antécédent | **55,4 % / 43,5 %** |
+| Délai moyen de réservation | **29,6 jours** |
+| Distance moyenne à la clinique | **10,1 km** |
+
+##  Findings clés
+
+- **Délai de réservation** : facteur individuel le plus déterminant — **24,8 %** de no-show pour une réservation à 0-3 jours contre **60,5 %** au-delà de 30 jours.
+- **Distance** : effet de seuil marqué au-delà de **20 km** (**57,8 %** de no-show).
+- **Antécédent de no-show** : effet **gradient**, pas un simple seuil — 43,5 % → 53,5 % → 59,4 % → 67,9 % selon le nombre d'antécédents cumulés. `previous_no_shows` devrait donc être conservé en valeur continue plutôt qu'en indicateur binaire.
+- **Canal de rappel** : le **SMS** reste le plus efficace sur le terrain, mais pèse le moins dans le modèle prédictif.
+- **Score de risque combiné** (délai > 30j, antécédent, distance > 20 km, absence de rappel — de 0 à 4 facteurs) :
+
+  | Facteurs cumulés | Rendez-vous | Taux de No-Show |
+  |---|---|---|
+  | 0 | 1 013 | 31,4 % |
+  | 1 | 2 125 | 44,9 % |
+  | 2 | 1 470 | 59,3 % |
+  | 3 | 370 | 71,1 % |
+  | 4 (échantillon faible, n=22) | 22 | 68,2 % |
+
+##  Modèles testés (S7)
+
+| Approche | Accuracy | AUC | Recall |
+|---|---|---|---|
+| Score de risque seul (régression logistique) | 59,8 % | 0,616 | 48,8 % |
+| 4 facteurs séparés (régression logistique) | 61,7 % | 0,644 | **64,0 %** |
+| Variables brutes (12 colonnes) | — | 0,672 | 59,5 % |
+| Random forest (profondeur 8, variables brutes) | 75,8 % (train) / 61,4 % (test) — surapprentissage net | — | — |
+
+**Conclusion :** le score agrégé reste utile pour la priorisation opérationnelle et la segmentation dans le dashboard, mais les **4 facteurs séparés sont recommandés pour un futur modèle prédictif** (meilleur recall).
+
+##  Dashboard Power BI
+
+Dashboard Power BI (1 page), construit en S5 et affiné en S6 :
+
+- 5 cartes KPI
+- 5 graphiques comparatifs (No-Show global, délai de réservation, historique, distance, canal de rappel)
+- Filtres interactifs : type de rendez-vous, âge, genre
+- Correction S6 : graphique « No-Show by History » passé de camembert à barres (comparaison de deux taux indépendants, pas des parts d'un tout), recoloré selon la charte du dashboard (corail au-dessus de la moyenne globale, teal en dessous)
+
+Fichier : `week 8 Health Connect/dashboard/healthConnectClinicDashboard.pbix` (version la plus à jour) — à ouvrir avec **Power BI Desktop**.
+
+##  Limites
+
+- Dataset fictif et anonymisé : les résultats ne reflètent pas une vraie clinique.
+- Échantillon à 4 facteurs de risque cumulés trop faible pour conclure (n = 22).
+- Un sous-groupe de no-show échappe aux 4 facteurs de risque connus — angle mort identifié via l'analyse des faux négatifs.
+- Corrélation ≠ causalité : d'autres facteurs non présents dans les données (revenu, moyen de transport...) peuvent expliquer certains liens observés.
+- Aucune validation croisée reçue de la piste Data Science au moment de la clôture S8.
+- Modèles de S7 exploratoires, non représentatifs d'un modèle final de production.
+
+## 🛠 Stack technique
+
+Power BI · DAX · Python (Pandas, scikit-learn) · Jupyter Notebook · SQL Server
+
 
 ---
-
-##  Objectifs du dashboard
-
-Le tableau de bord a été conçu pour permettre de :
-
-1. Suivre les principaux indicateurs liés aux rendez-vous.
-2. Mesurer le taux global de No-Show.
-3. Analyser les facteurs associés aux absences.
-4. Comparer les comportements selon les profils de patients.
-5. Étudier l'impact potentiel des rappels.
-6. Analyser le délai entre la réservation et le rendez-vous.
-7. Examiner la relation entre la distance et les absences.
-8. Identifier les catégories de rendez-vous présentant les taux de No-Show les plus élevés.
-
----
-
-##  KPI principaux
-
-Le dashboard permet notamment de suivre :
-
-| KPI                     | Description                                                          |
-| ----------------------- | -------------------------------------------------------------------- |
-| **Reminder Rate**       | Pourcentage de rendez-vous ayant reçu un rappel                      |
-| **No-Show Rate**        | Pourcentage de rendez-vous non honorés                               |
-| **Repeat No-Show Rate** | Taux de No-Show chez les patients ayant déjà un historique d'absence |
-| **Average Lead Time**   | Délai moyen entre la réservation et le rendez-vous                   |
-| **Average Distance**    | Distance moyenne entre le patient et la clinique                     |
-
-Ces indicateurs permettent d'obtenir rapidement une vision globale de la situation et de suivre les facteurs potentiellement associés aux absences.
-
----
-
-##  Analyses réalisées
-
-### 1. Analyse du No-Show
-
-Le dashboard permet d'observer le taux de No-Show et de comparer les rendez-vous honorés et non honorés.
-
-### 2. Analyse du délai de réservation
-
-Le délai entre la réservation et la date du rendez-vous est analysé afin d'identifier son éventuelle relation avec le taux d'absence.
-
-### 3. Historique des absences
-
-L'analyse prend en compte l'existence d'un précédent No-Show afin d'identifier les patients présentant un risque récurrent d'absence.
-
-### 4. Analyse de la distance
-
-La distance entre le patient et la clinique est regroupée en catégories afin d'étudier son association avec les absences.
-
-### 5. Analyse des rappels
-
-Les différents canaux de rappel sont comparés afin d'observer leur association avec le comportement des patients.
-
-### 6. Analyse du type de rendez-vous
-
-Les taux de No-Show sont comparés selon les différents types de rendez-vous.
-
-### 7. Segmentation
-
-Les données peuvent être explorées selon différents profils, notamment :
-
-* groupe d'âge ;
-* genre ;
-* type de rendez-vous ;
-* historique de No-Show ;
-* canal de rappel.
-
----
-
-##  Fonctionnalités du dashboard
-
-Le rapport Power BI comprend :
-
-* des cartes KPI ;
-* des graphiques interactifs ;
-* des analyses comparatives ;
-* des filtres dynamiques ;
-* des segmentations par profil patient ;
-* des visualisations permettant d'identifier les facteurs associés au No-Show.
-
-L'utilisateur peut ainsi passer d'une **vue globale** à une analyse plus détaillée des différents segments.
-
----
-
-##  Stack technique
-
-* **Power BI** — Business Intelligence et visualisation
-* **Power Query** — préparation et transformation des données
-* **DAX** — création des mesures et KPI
-* **Python / Pandas** — exploration et analyse initiale des données
-* **Jupyter Notebook** — analyse exploratoire
-
-
-##  Utilisation
-
-### Prérequis
-
-Pour consulter ou modifier le dashboard :
-
-* Microsoft Power BI Desktop
-
-Pour reproduire l'analyse exploratoire :
-
-* Python
-* Pandas
-* Jupyter Notebook
-
-### Ouvrir le dashboard
-
-Ouvrir le fichier :
-
-```text
-week5-healthconnect/data/healthConnectClinicDashboard.pbix
-```
-
-avec **Power BI Desktop**.
-
-Pour reproduire l'analyse du Week 4 :
-
-```bash
-pip install pandas
-jupyter notebook week4-healthconnect/analyse/HealthConnect_Semaine4_Notebook.ipynb
-```
-
----
-
-##  Insights et valeur business
-
-L'utilisation de Power BI permet de transformer les résultats de l'analyse en un outil directement exploitable par les responsables de la clinique.
-
-Le dashboard peut notamment aider à :
-
-* identifier les profils présentant davantage de No-Shows ;
-* suivre l'évolution des indicateurs clés ;
-* comprendre les facteurs associés aux rendez-vous manqués ;
-* améliorer les stratégies de rappel ;
-* optimiser la gestion des créneaux médicaux ;
-* prendre des décisions basées sur les données.
-
-L'objectif final est de contribuer à la **réduction des rendez-vous manqués**, à une meilleure utilisation des ressources médicales et à l'amélioration de l'expérience des patients.
-
----
-
+*AnalystLab Africa Experience Lab.*
